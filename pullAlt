@@ -1,0 +1,14 @@
+'''
+Created on Feb 2, 2015
+
+@author: amagoon
+'''
+
+#    Returns only what is between the alt tag
+def returnAlt(line):
+    key = 'alt="'
+    end = '\"'
+    start = line.find(key) + 5
+    line = line[start::]
+    endit = line.find(end)
+    return line[:endit]
