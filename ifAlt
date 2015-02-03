@@ -1,0 +1,12 @@
+'''
+Created on Feb 3, 2015
+
+@author: amagoon
+'''
+from scrapper import pullAlt as a
+
+def alt(item):
+    if item.find("alt=") > -1:
+        my_alt = a.returnAlt(item)
+        if len(my_alt) > 0:
+            return my_alt
