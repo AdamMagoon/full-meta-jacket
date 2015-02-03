@@ -1,5 +1,5 @@
 # full-meta-jacket
-This program accepts one argument, a URL. It returns a structured list of that page's meta data. Will not containe duplicates.
+This program accepts one argument, a URL. It prints to console a structured list of that page's meta data. Will not containe duplicates.
 
 Future Features:
 - Upon completion, create an .html file that will be used to display the images along side their 'alt' text.
