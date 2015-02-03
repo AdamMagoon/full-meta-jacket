@@ -1,0 +1,27 @@
+'''
+Created on Feb 2, 2015
+
+@author: amagoon
+'''
+import os
+import wget
+from urllib.error import URLError
+
+def extract_name(string):
+    key = "//"
+    start = string.find(key)
+    temp_string = string[start+2::]
+    my_string = temp_string.replace('/', '-')
+    return my_string
+
+def define_page(url):
+    file_name = extract_name(url) + '.txt'
+    if os.path.isfile(file_name) == False:
+        try:
+            wget.download(url, file_name)
+        except URLError:
+            print("Not a valid URL")
+        else:
+            print("New text file created.")
+            print("Filename: ", file_name)
+    return file_name
