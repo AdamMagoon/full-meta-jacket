@@ -1,0 +1,70 @@
+'''
+Created on Feb 2, 2015
+
+@author: amagoon
+'''
+
+from scrapper import modifyData as r
+from scrapper import define_page as d
+from scrapper import getTitle as t
+from scrapper import ifAlt as iff
+from scrapper import structure_meta as structure
+from prettytable import PrettyTable
+
+#    Key strings to identify HTML tags.
+img_key = '<img'
+meta_key = '<meta'
+
+#    User's input
+webpage = input("Enter URL : ")
+
+#    First looks for an existing file, then creates one if none exist
+file_name = d.define_page(webpage)
+# print('\n','Filename: ',file_name, '\n')
+
+def start():
+    try:
+        with open(file_name) as content:
+            my_img_set = set()
+            my_meta_set = set()
+            title = ''
+            for line in content:
+                if title != '':
+                    pass
+                else:
+                    try:
+                        title = t.title(line)
+                        if title != '':
+                            print('Page Title: ',title, '\n')
+                    except:
+                        pass
+                try:
+                    images = r.return_tags(line, img_key)
+                    meta = r.return_tags(line, meta_key)
+                    for item in images:
+                        my_img_set.add(str(item))
+                    for item in meta:
+                        my_meta_set.add(str(item))
+                except TypeError:
+                    print('TypeError', line)
+                    
+            for item in my_img_set:
+                alt = iff.alt(item)
+                try:
+                    if len(alt) > 0:
+                        print("Image meta data: ",alt)
+                except TypeError:
+                    pass
+                
+            for item in my_meta_set:
+                try:
+                    mType, metaList = structure.meta(item)
+                    table = PrettyTable([mType])
+                    for i in metaList.split(','):
+                        table.add_row([i])
+                    print(table)
+                except:
+                    pass
+    except TypeError:
+        print("Could not open file. Program has been terminated.")
+start()
