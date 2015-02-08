@@ -10,6 +10,7 @@ from scrapper import getTitle as t
 from scrapper import ifAlt as iff
 from scrapper import structure_meta as structure
 from prettytable import PrettyTable
+from _csv import Error
 
 #    Key strings to identify HTML tags.
 img_key = '<img'
@@ -23,22 +24,24 @@ file_name = d.define_page(webpage)
 # print('\n','Filename: ',file_name, '\n')
 
 def start():
+    #    First attempts to open an existing file
+    #    If none exists, one is created.
+    my_img_set = set()
+    my_meta_set = set()
     try:
-        with open(file_name) as content:
-            my_img_set = set()
-            my_meta_set = set()
-            title = ''
+        with open(file_name) as content:           
+            title = ''  #    Set to an empty string to detect a change
             for line in content:
-                if title != '':
+                if title != '': #    No longer attempts to look for the title if it has changed
                     pass
                 else:
                     try:
                         title = t.title(line)
-                        if title != '':
-                            print('Page Title: ',title, '\n')
                     except:
                         pass
                 try:
+                    #    Only difference between the two bellow variables are the keys passed
+                    #    and what happens to the data after they get returned
                     images = r.return_tags(line, img_key)
                     meta = r.return_tags(line, meta_key)
                     for item in images:
@@ -48,23 +51,45 @@ def start():
                 except TypeError:
                     print('TypeError', line)
                     
-            for item in my_img_set:
-                alt = iff.alt(item)
-                try:
-                    if len(alt) > 0:
-                        print("Image meta data: ",alt)
-                except TypeError:
-                    pass
+            printout = d.define_printout(webpage)
+            try:
+                with open(printout, 'w+') as p:
+                    if title != '':
+                        try:
+                            p.write('Page Title: '+title+'\n'+'\n')
+                        except:
+                            print("could not write title to file")
+                            raise Exception
+                    #    Pulls alt text from img tags
+                    for item in my_img_set:
+                        alt = iff.alt(item)
+                        try:
+                            if len(alt) > 0:
+                                p.write("Image meta data: " + alt + '\n')
+                        except Exception as exc:
+                            raise RuntimeError("write alt text fail") from exc
+                        
+                    #    Organizes and cleans up meta data
+                    for item in my_meta_set:
+                        try:
+                            mType, metaList = structure.meta(item)
+                        except TypeError:
+                            pass
+                        else:
+                            table = PrettyTable([mType])
+                            for i in metaList.split(','):
+                                table.add_row([i])
+                            p.write(table.get_string() + '\n')
+            except TypeError:
+                print("Create printout failed.")
                 
-            for item in my_meta_set:
-                try:
-                    mType, metaList = structure.meta(item)
-                    table = PrettyTable([mType])
-                    for i in metaList.split(','):
-                        table.add_row([i])
-                    print(table)
-                except:
-                    pass
+            print("""
+Operation complete.
+Filename: %s
+File Location: %s"""
+% (file_name,"C:\Anaconda\Workspaces\Project Setup\src\scrapper"))
+            
     except TypeError:
         print("Could not open file. Program has been terminated.")
+
 start()
