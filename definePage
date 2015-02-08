@@ -25,3 +25,6 @@ def define_page(url):
             print("New text file created.")
             print("Filename: ", file_name)
     return file_name
+def define_printout(url):
+    file_name = extract_name(url) + '-print-' + '.txt'
+    return file_name
