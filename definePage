@@ -19,8 +19,9 @@ def define_page(url):
     if os.path.isfile(file_name) == False:
         try:
             wget.download(url, file_name)
-        except URLError:
-            print("Not a valid URL")
+        except (URLError, ValueError) as e:
+            print("Not a valid URL", e)
+            return ''
         else:
             print("New text file created.")
             print("Filename: ", file_name)
