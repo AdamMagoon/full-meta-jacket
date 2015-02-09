@@ -4,56 +4,62 @@ Created on Feb 2, 2015
 @author: amagoon
 '''
 
+webpage = input("Enter URL : ")
+import time
 from scrapper import modifyData as r
 from scrapper import define_page as d
 from scrapper import getTitle as t
 from scrapper import ifAlt as iff
 from scrapper import structure_meta as structure
 from prettytable import PrettyTable
-from _csv import Error
 
 #    Key strings to identify HTML tags.
 img_key = '<img'
 meta_key = '<meta'
 
 #    User's input
-webpage = input("Enter URL : ")
+date = time.strftime("%m/%d/%Y")
+start = time.clock()
 
 #    First looks for an existing file, then creates one if none exist
 file_name = d.define_page(webpage)
 # print('\n','Filename: ',file_name, '\n')
 
-def start():
+def startIndividualURL():
     #    First attempts to open an existing file
     #    If none exists, one is created.
     my_img_set = set()
     my_meta_set = set()
     try:
-        with open(file_name) as content:           
+        with open(file_name, encoding='utf-8') as content:           
             title = ''  #    Set to an empty string to detect a change
-            for line in content:
-                if title != '': #    No longer attempts to look for the title if it has changed
-                    pass
-                else:
-                    try:
-                        title = t.title(line)
-                    except:
+            try:
+                for line in content:
+                    if title != '': #    No longer attempts to look for the title if it has changed
                         pass
-                try:
-                    #    Only difference between the two bellow variables are the keys passed
-                    #    and what happens to the data after they get returned
-                    images = r.return_tags(line, img_key)
-                    meta = r.return_tags(line, meta_key)
-                    for item in images:
-                        my_img_set.add(str(item))
-                    for item in meta:
-                        my_meta_set.add(str(item))
-                except TypeError:
-                    print('TypeError', line)
-                    
+                    else:
+                        try:
+                            title = t.title(line)
+                        except:
+                            pass
+                    try:
+                        #    Only difference between the two bellow variables are the keys passed
+                        #    and what happens to the data after they get returned
+                        images = r.return_tags(line, img_key)
+                        meta = r.return_tags(line, meta_key)
+                        for item in images:
+                            my_img_set.add(str(item))
+                        for item in meta:
+                            my_meta_set.add(str(item))
+                    except TypeError:
+                        print('TypeError', line)
+            except UnicodeDecodeError:
+                print("Unicode Error")
+                
             printout = d.define_printout(webpage)
             try:
                 with open(printout, 'w+') as p:
+                    p.write(date+"\n")
                     if title != '':
                         try:
                             p.write('Page Title: '+title+'\n'+'\n')
@@ -87,9 +93,10 @@ def start():
 Operation complete.
 Filename: %s
 File Location: %s"""
-% (file_name,"C:\Anaconda\Workspaces\Project Setup\src\scrapper"))
+% (printout,"C:\Anaconda\Workspaces\Project Setup\src\scrapper"))
             
     except TypeError:
         print("Could not open file. Program has been terminated.")
 
-start()
+startIndividualURL()
+print(time.clock() - start)
