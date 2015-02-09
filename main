@@ -30,73 +30,74 @@ def startIndividualURL():
     #    If none exists, one is created.
     my_img_set = set()
     my_meta_set = set()
-    try:
-        with open(file_name, encoding='utf-8') as content:           
-            title = ''  #    Set to an empty string to detect a change
-            try:
-                for line in content:
-                    if title != '': #    No longer attempts to look for the title if it has changed
-                        pass
-                    else:
-                        try:
-                            title = t.title(line)
-                        except:
-                            pass
-                    try:
-                        #    Only difference between the two bellow variables are the keys passed
-                        #    and what happens to the data after they get returned
-                        images = r.return_tags(line, img_key)
-                        meta = r.return_tags(line, meta_key)
-                        for item in images:
-                            my_img_set.add(str(item))
-                        for item in meta:
-                            my_meta_set.add(str(item))
-                    except TypeError:
-                        print('TypeError', line)
-            except UnicodeDecodeError:
-                print("Unicode Error")
-                
-            printout = d.define_printout(webpage)
-            try:
-                with open(printout, 'w+') as p:
-                    p.write(date+"\n")
-                    if title != '':
-                        try:
-                            p.write('Page Title: '+title+'\n'+'\n')
-                        except:
-                            print("could not write title to file")
-                            raise Exception
-                    #    Pulls alt text from img tags
-                    for item in my_img_set:
-                        alt = iff.alt(item)
-                        try:
-                            if len(alt) > 0:
-                                p.write("Image meta data: " + alt + '\n')
-                        except Exception as exc:
-                            raise RuntimeError("write alt text fail") from exc
-                        
-                    #    Organizes and cleans up meta data
-                    for item in my_meta_set:
-                        try:
-                            mType, metaList = structure.meta(item)
-                        except TypeError:
+    if file_name != '':
+        try:
+            with open(file_name, encoding='utf-8') as content:           
+                title = ''  #    Set to an empty string to detect a change
+                try:
+                    for line in content:
+                        if title != '': #    No longer attempts to look for the title if it has changed
                             pass
                         else:
-                            table = PrettyTable([mType])
-                            for i in metaList.split(','):
-                                table.add_row([i])
-                            p.write(table.get_string() + '\n')
-            except TypeError:
-                print("Create printout failed.")
+                            try:
+                                title = t.title(line)
+                            except:
+                                pass
+                        try:
+                            #    Only difference between the two bellow variables are the keys passed
+                            #    and what happens to the data after they get returned
+                            images = r.return_tags(line, img_key)
+                            meta = r.return_tags(line, meta_key)
+                            for item in images:
+                                my_img_set.add(str(item))
+                            for item in meta:
+                                my_meta_set.add(str(item))
+                        except TypeError:
+                            print('TypeError', line)
+                except UnicodeDecodeError:
+                    print("Unicode Error")
+                    
+                printout = d.define_printout(webpage)
+                try:
+                    with open(printout, 'w+') as p:
+                        p.write(date+"\n")
+                        if title != '':
+                            try:
+                                p.write('Page Title: '+title+'\n'+'\n')
+                            except:
+                                print("could not write title to file")
+                                raise Exception
+                        #    Pulls alt text from img tags
+                        for item in my_img_set:
+                            alt = iff.alt(item)
+                            try:
+                                if len(alt) > 0:
+                                    p.write("Image meta data: " + alt + '\n')
+                            except Exception as exc:
+                                raise RuntimeError("write alt text fail") from exc
+                            
+                        #    Organizes and cleans up meta data
+                        for item in my_meta_set:
+                            try:
+                                mType, metaList = structure.meta(item)
+                            except TypeError:
+                                pass
+                            else:
+                                table = PrettyTable([mType])
+                                for i in metaList.split(','):
+                                    table.add_row([i])
+                                p.write(table.get_string() + '\n')
+                except TypeError:
+                    print("Create printout failed.")
+                    
+                print("""
+    Filename: %s
+    File Location: %s"""
+    % (printout,"C:\Anaconda\Workspaces\Project Setup\src\scrapper"))
                 
-            print("""
-Operation complete.
-Filename: %s
-File Location: %s"""
-% (printout,"C:\Anaconda\Workspaces\Project Setup\src\scrapper"))
-            
-    except TypeError:
-        print("Could not open file. Program has been terminated.")
+        except TypeError:
+            print("Could not open file. Program has been terminated.")
 
 startIndividualURL()
 print(time.clock() - start)
+print("Operation complete.")
