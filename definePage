@@ -26,5 +26,9 @@ def define_page(url):
             print("Filename: ", file_name)
     return file_name
 def define_printout(url):
-    file_name = extract_name(url) + '-print-' + '.txt'
+    name = extract_name(url)
+    if name[-1] == '/' or name[-1] == '-':
+        file_name = name + 'printout' + '.txt'
+    else:
+        file_name = name + '-printout' + '.txt.'
     return file_name
