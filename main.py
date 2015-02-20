@@ -80,7 +80,7 @@ def startIndividualURL():
                 print("""
 Filename: %s
 File Location: %s"""
-    % (printout,"C:\Anaconda\Workspaces\Project Setup\src\scrapper\\" + dir))
+    % (printout,"C:\Anaconda\Workspaces\Project Setup\src\scrapper\" + dir))
                 
         except (TypeError, FileNotFoundError):
             print("Could not open file. Program has been terminated.")
