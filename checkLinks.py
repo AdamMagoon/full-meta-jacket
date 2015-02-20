@@ -25,18 +25,19 @@ class Page(object):
     
     '''
 
-    def __init__(self, url):
+    def __init__(self, file, url):
+        self.file = file
         self.url = url
         try:
-            self.soup = BeautifulSoup(open(url))
+            self.soup = BeautifulSoup(open(file))
         except URLError as e:
             log_traceback(e)
-        self.childLinks = []
+        self.childLinks = set()
     
     def checkLink(self):
         """  Boolean : Checks validation of URL  """
         try:
-            urlopen(url)
+            urlopen(file)
         except URLError as e:
             log_traceback(e)
             return False
@@ -76,12 +77,23 @@ class Page(object):
             urls.add(a.get('href'))
         return urls
     
-url = 'dsadetection.txt'
-home = Page(url)
+    def r_short(self):
+        urlLen = len((self.url))
+        childList = list(self.childLinks)
+        for link in childList:
+            if len(link) < urlLen:
+                self.childLinks.remove(link)
+                
+    
+url = 'https://www.dsadetection.com/'
+file = 'dsadetection.txt'
+home = Page(file, url)
 links = home.getUniqueAnchors()
 urls = home.getUniqueUrls()
+print("Total Links: ", home.getAnchorCount())
 for u in urls:
-    home.childLinks.append(u)
-home.childLinks.r_short
-  
+    home.childLinks.add(u)
+print(len(home.childLinks), home.childLinks)
+home.r_short()
+print(len(home.childLinks), home.childLinks)  
 print("Total time: ", time.clock() - start)
