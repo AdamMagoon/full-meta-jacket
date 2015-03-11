@@ -12,16 +12,14 @@ import sys
 start = time.clock()
 
 def main():
-    url = "https://dsadetection.com/dev/ied-threat-training-aids/ied-training-kits/complete-kits/tsk7100-explosives-sample-kit.html"
+    url = input("Enter URL")
     file_name, domainFolder, html_dir = w.define_page(url)
-    file_location = sys.path[0] + '\\' + html_dir + '\\' + file_name
-    title, altSet, metaSet = e.extractMeta(file_location)
-    printLocation = domainFolder + '\\' + title + '.txt'
+    html_location = sys.path[0] + '\\' + html_dir + '\\' + file_name
+    title, altSet, metaSet = e.extractMeta(html_location)
+    printout_name = file_name
+    printLocation = sys.path[0] + '\\' + domainFolder + '\\' + printout_name
     c.createPrintout(printLocation, title, altSet, metaSet)
     print("""Filename: %s
-File Location: %s""" % (title, printLocation))
+File Location: %s""" % (printout_name, printLocation))
 
 main()
-
-print(time.clock() - start)
-print("Operation complete.")
