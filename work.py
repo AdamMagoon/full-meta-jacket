@@ -4,44 +4,6 @@ Created on Feb 16, 2015
 @author: amagoon
 '''
 
-def mainDataName(string):
-    """ Function to extract domain name from URL """
-    indexEnd = string.find("-")
-    return string[:indexEnd]
-
-
-def return_tags(line, key):
-    end = '>'
-    my_list = []
-    
-    #    Pass it a line, it'll return the tag
-    def retrieve_tag(line):
-        indx_end = line.find(end)
-        return line[:indx_end+1], indx_end
-    
-    def if_find_key(line):
-        lineS = line.lower()
-        idx = lineS.find(key)
-        if idx > -1:
-            tag, idx_end = retrieve_tag(line[idx::])
-            my_list.append(tag)
-            line = line[idx_end+1::]
-            if idx_end != -1:
-                if_find_key(line)
-    
-    if_find_key(line)
-    return my_list
-
-def title(line):
-    key = '<title>'
-    findit = line.find(key)
-    if findit != -1:
-        endit = '</title>'
-        stopit = line.find(endit)
-        return line[findit+7:stopit]
-    else:
-        return ''
-    
     #    Returns only what is between the alt tag
 def returnAlt(line):
     key = 'alt="'
@@ -66,58 +28,90 @@ def meta(line):
     keywords = 'name="keywords"'
     content = 'content='
     lineSearch = line.lower()
-    findD = lineSearch.find(description)
-    findK = lineSearch.find(keywords)
-    c = lineSearch.find(content)
-    new_line = line[c+9::]
+    getDescription = lineSearch.find(description)
+    getKeywords = lineSearch.find(keywords)
+    getContent = lineSearch.find(content)
+    new_line = line[getContent+9::]
     end = new_line.find('\"')
     my_line = new_line[:end]
     
-    if findD > 0:
+    if getDescription > 0:
         return "Description: ", my_line
-    if findK > 0:
+    if getKeywords > 0:
         return "Keywords: ", my_line
 
 import os
 import wget
 from urllib.error import URLError
-import requests as r
+import urllib.request as u
 
 def extract_name(string, dir):
     key = string.replace("https://",'')
     key = key.replace("http://",'')
     key = key.replace("www.", '')
-    key = key.replace('ftp.','')
     key = key.replace(dir,'')
-    return key.replace('/', '-')
+    key = key.replace('.','-')
+    key = key.replace('/', '-')
+    if key[0] == '-':
+        key = key[1::]
+    return key
 
 
 def define_page(url):
+    """ 
+    Sends a GET request to the specified URL. Saves the response to a file for later access.
+
+        - Checks if archived file exists; creates file if neccessary
+        - Makes URL Request if not
+        - If 403 Error, creates spoof to bypass
+        - Saves response to .txt file
+    """
+
+    # Imports
     from tld import get_tld
+    from genericpath import getmtime
+    import time
+
+    # Local variables
     domain = get_tld(url)
     file_name = extract_name(url, domain) + '.txt'
     html_dir = domain + '\\html'
+    file_path = html_dir + '\\' + file_name
+    now = time.time()
+    ageLimit = 604800
 
     if not os.path.exists(domain):
-        os.makedirs(domain)
         os.makedirs(html_dir)
         print("New directory created: ", domain)
 
-    if not os.path.isfile(html_dir + '\\' + file_name):
-        print("File does not exist...attempting to create a new reference file.")
+    if not os.path.isfile(file_path) or now - getmtime(file_path) > ageLimit:
+        print("File does not exist or is past a week old...attempting to create a new reference file.")
         try:
-            wget.download(url, html_dir + '\\' + file_name)
+            wget.download(url, file_path)
         except (URLError, ValueError) as e:
             print("Not a valid URL - ", e)
             try:
-                urlObject = r.get(url)
-                print(urlObject)
+                print("Assembling spoof request")
+                spoof = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/40.0.2214.93 Safari/537.36'
+                agentRequest = {'User-Agent': spoof}
+                urlObject = u.Request(url, headers=agentRequest)
+                page = u.urlopen(urlObject)
+                try:
+                    with open(file_path, 'w+') as f:
+                        for line in page:
+                            line = line.decode('utf-8')
+                            f.write(line)
+                except:
+                    import sys
+                    print("spoof failed\nTerminating program.")
+                    sys.exit(0)
             except (URLError, ValueError) as er:
                 print("Again, Not a valid URL - ", er)
-                return ''
+                print("No further options available.\nTerminating program.")
+                sys.exit(0)
         else:
             print("New reference file created.")
-            print("Filename: ", file_name)
+            print("Reference Filename: ", file_name)
     return file_name, domain, html_dir
 
 def define_printout(url):
