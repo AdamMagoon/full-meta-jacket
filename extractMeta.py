@@ -19,8 +19,11 @@ def extractMeta(file_location):
             title = title[0]
             rawImageSet = set(soup.find_all('img'))
             metaSet = set(soup.find_all('meta'))
-    except (TypeError, FileNotFoundError):
+    except (TypeError, FileNotFoundError, AttributeError):
+        import os, sys
+        print("filesize: ", os.path.getsize(file_location))
         print("Could not open file. Program has been terminated.")
+        sys.exit(0)
 
     else:
         ''' Attempts to use get() function to get only the alt text '''
